@@ -7,6 +7,7 @@ const cards = require('./routes/cards');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/NotFoundError');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
 
@@ -20,6 +21,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
   useUnifiedTopology: true,
 });
+
+app.use(requestLogger);
 
 app.post('/signup', celebrate({
   body: Joi.object().keys({
@@ -42,6 +45,8 @@ app.use('/cards', auth, cards);
 app.use(() => {
   throw new NotFoundError('Запрашиваемый ресурс не найден');
 });
+
+app.use(errorLogger);
 
 app.use(errors());
 
