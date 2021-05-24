@@ -30,8 +30,13 @@ module.exports.deleteCard = (req, res, next) => {
         throw new ForbiddenError('Невозможно удаление карточки других пользователей');
       }
       Card.findByIdAndRemove(req.params.cardId)
-        .then((card) => res.status(200).send({ data: card }))
-        .catch(next);
+        .then((card) => res.status(200).send({ data: card }));
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        throw new BadRequestError('Переданы некорректные данные');
+      }
+      throw new NotFoundError(err.message);
     })
     .catch(next);
 };

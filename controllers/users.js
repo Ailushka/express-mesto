@@ -6,6 +6,8 @@ const NotFoundError = require('../errors/NotFoundError');
 const ConflictError = require('../errors/ConflictError');
 const AuthorizationError = require('../errors/AuthorizationError');
 
+const { NODE_ENV, JWT_SECRET } = process.env;
+
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send({ data: users }))
@@ -17,6 +19,9 @@ module.exports.getUserById = (req, res, next) => {
     .orFail(() => new Error('Пользователь по указанному _id не найден'))
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
+      if (err.name === 'CastError') {
+        throw new BadRequestError('Переданы некорректные данные');
+      }
       throw new NotFoundError(err.message);
     })
     .catch(next);
@@ -49,7 +54,6 @@ module.exports.createUser = (req, res, next) => {
       data: {
         _id: user._id,
         email: user.email,
-        password: undefined,
       },
     }))
     .catch((err) => {
@@ -102,7 +106,9 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        'some-secret-key',
+        NODE_ENV === 'production'
+          ? JWT_SECRET
+          : 'some-secret-key',
         { expiresIn: '7d' },
       );
 
