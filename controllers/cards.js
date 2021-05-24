@@ -5,7 +5,7 @@ const ForbiddenError = require('../errors/ForbiddenError');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.status(200).send({ data: cards }))
+    .then((cards) => res.status(200).send(cards))
     .catch(next);
 };
 
@@ -13,7 +13,7 @@ module.exports.createCard = (req, res, next) => {
   const owner = req.user._id;
   const { name, link } = req.body;
   Card.create({ name, link, owner })
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => res.status(200).send(card))
     .catch((err) => {
       throw new BadRequestError(err.message);
     })
@@ -30,7 +30,7 @@ module.exports.deleteCard = (req, res, next) => {
         throw new ForbiddenError('Невозможно удаление карточки других пользователей');
       }
       Card.findByIdAndRemove(req.params.cardId)
-        .then((card) => res.status(200).send({ data: card }));
+        .then((card) => res.status(200).send(card));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -48,7 +48,7 @@ module.exports.likeCard = (req, res, next) => {
     { new: true },
   )
     .orFail(() => new Error('Карточка с указанным _id не найдена'))
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => res.status(200).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         throw new BadRequestError('Переданы некорректные данные');
@@ -65,7 +65,7 @@ module.exports.dislikeCard = (req, res, next) => {
     { new: true },
   )
     .orFail(() => new Error('Карточка с указанным _id не найдена'))
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => res.status(200).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         throw new BadRequestError('Переданы некорректные данные');

@@ -10,14 +10,14 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.status(200).send({ data: users }))
+    .then((users) => res.status(200).send(users))
     .catch(next);
 };
 
 module.exports.getUserById = (req, res, next) => {
   User.findById(req.params._id)
     .orFail(() => new Error('Пользователь по указанному _id не найден'))
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
         throw new BadRequestError('Переданы некорректные данные');
@@ -30,7 +30,7 @@ module.exports.getUserById = (req, res, next) => {
 module.exports.getUserInfo = (req, res, next) => {
   User.findById(req.user._id)
     .orFail(() => new Error('Пользователь по указанному _id не найден'))
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       throw new NotFoundError(err.message);
     })
@@ -51,10 +51,8 @@ module.exports.createUser = (req, res, next) => {
       password: hash,
     }))
     .then((user) => res.status(200).send({
-      data: {
-        _id: user._id,
-        email: user.email,
-      },
+      _id: user._id,
+      email: user.email,
     }))
     .catch((err) => {
       if (err.name === 'MongoError' && err.code === 11000) {
@@ -72,7 +70,7 @@ module.exports.patchUserInfo = (req, res, next) => {
     runValidators: true,
   })
     .orFail(() => new Error('Пользователь по указанному _id не найден'))
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         throw new BadRequestError('Переданы некорректные данные');
@@ -89,7 +87,7 @@ module.exports.patchUserAvatar = (req, res, next) => {
     runValidators: true,
   })
     .orFail(() => new Error('Пользователь по указанному _id не найден'))
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         throw new BadRequestError('Переданы некорректные данные');
